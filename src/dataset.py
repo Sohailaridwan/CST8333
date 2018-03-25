@@ -1,3 +1,8 @@
+"""dataset.py: Parses provided data, generates database tables with SQLite's ORM, displays data from database."""
+
+__author__      = "Sohaila Ridwan"
+__date__   = "March 25, 2018"
+
 import csv
 import os
 from peewee import *
@@ -5,6 +10,7 @@ from datetime import datetime
 
 # SQLite Database access variable
 db = SqliteDatabase("app.db")
+
 
 def load_dataset():
     """Loads the dataset from CSV file and converts to python list.
@@ -15,10 +21,12 @@ def load_dataset():
         reader = csv.reader(datafile)
         return list(reader)
 
+
 def create_tables():
     """Creates the database based on the orm models.
     """
     db.create_tables([Categories, GeoCodes, PriceIndex], safe=True)
+
 
 def populate_geocodes():
     """Populates the SQLiteDB GeoCodes table with the data from the CSV file.
@@ -39,6 +47,7 @@ def populate_geocodes():
     for code in codes:
         GeoCodes.get_or_create(desc=code[1])
 
+
 def populate_categories():
     """Populates the SQLiteDB Categories table with the data from the CSV file.
 
@@ -51,6 +60,7 @@ def populate_categories():
     categories = set(categories)
     for cat in categories:
         Categories.get_or_create(desc=cat[0])
+
 
 def populate_price_indexes():
     """Populates the SQLite Database with the data from CSV file.
@@ -76,26 +86,28 @@ def populate_price_indexes():
 
         try:
             PriceIndex.get_or_create(date=date,
-                              geocode=geocodes[row[1]],
-                              category=cats[row[2]],
-                              vector=vector,
-                              price=float(price))
+                                     geocode=geocodes[row[1]],
+                                     category=cats[row[2]],
+                                     vector=vector,
+                                     price=float(price))
         except Exception as e:
             print("Error: {}".format(e))
 
-def show_tables():
-    """Shows a list containing all the tables in the database."""
-    print(db.get_tables())
+
+
+
 
 def display_geocodes():
     """Displays all the rows from the GeoCodes table."""
     for geocode in GeoCodes.select():
         print("{:2}| {}".format(geocode.id, geocode.desc))
 
+
 def display_categories():
     """Displays all the rows from the Categories table."""
     for cat in Categories.select():
         print("{:3}| {}".format(cat.id, cat.desc))
+
 
 def display_price_indexes():
     """Displays all the rows from the PriceIndex table."""
@@ -106,16 +118,21 @@ def display_price_indexes():
                                       index.vector,
                                       index.price))
 
+
 class BaseModel(Model):
     """Base ORM."""
+
     class Meta:
         database = db
+
 
 class Categories(BaseModel):
     desc = CharField()
 
+
 class GeoCodes(BaseModel):
     desc = CharField()
+
 
 class PriceIndex(BaseModel):
     """ORM for PriceIndex."""
@@ -125,18 +142,17 @@ class PriceIndex(BaseModel):
     vector = CharField()
     price = DoubleField()
 
-
     class Meta:
         coordinate = CompositeKey(GeoCodes, Categories)
+
 
 if __name__ == '__main__':
     """Creates the database and populates it from the provided data file."""
     # show_tables()
     # create_tables()
     # populate_geocodes()
-    # display_geocodes()
+    display_geocodes()
     # populate_categories()
     # display_categories()
     # populate_price_indexes()
-    display_price_indexes()
-    show_tables()
+    # display_price_indexes()

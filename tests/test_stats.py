@@ -1,3 +1,8 @@
+"""test_stats.py: Tests the functionality of dataset.py."""
+
+__author__      = "Sohaila Ridwan"
+__date__   = "March 25, 2018"
+
 from .context import model
 
 def test_yearly_average():
