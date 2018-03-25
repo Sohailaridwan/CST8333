@@ -2,3 +2,4 @@ pyscaffold
 sphinx
 peewee
 pytest
+click

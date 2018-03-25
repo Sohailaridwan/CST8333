@@ -11,7 +11,7 @@ def load_dataset():
 
     :return: list object.
     """
-    with open(os.path.abspath("C:\\Users\\sohaila\\PycharmProjects\\CST8333\\src\\data.csv"), "r") as datafile:
+    with open(os.path.abspath("./data.csv"), "r") as datafile:
         reader = csv.reader(datafile)
         return list(reader)
 
@@ -37,7 +37,7 @@ def populate_geocodes():
              (10, 'Alberta'),
              (11, 'British Columbia')]
     for code in codes:
-        GeoCodes.get_or_create(code=code[0], desc=code[1])
+        GeoCodes.get_or_create(desc=code[1])
 
 def populate_categories():
     """Populates the SQLiteDB Categories table with the data from the CSV file.
@@ -50,7 +50,7 @@ def populate_categories():
         categories.append((i[2], i[-2].split('.')[-1]))
     categories = set(categories)
     for cat in categories:
-        Categories.get_or_create(code=cat[1], desc=cat[0])
+        Categories.get_or_create(desc=cat[0])
 
 def populate_price_indexes():
     """Populates the SQLite Database with the data from CSV file.
@@ -58,21 +58,30 @@ def populate_price_indexes():
     Must be called after calling `populate_geocodes` and `populate_categories`.
     """
     dataset = load_dataset()
+
+    geocodes = {}
+    for gcode in GeoCodes.select():
+        geocodes[gcode.desc] = gcode
+    print(geocodes)
+    cats = {}
+    for cat in Categories.select():
+        cats[cat.desc] = cat
+    print(cats)
     for row in dataset:
         date = datetime.strptime(row[0], "%Y/%m")
-        geocode = GeoCodes.get(GeoCodes.desc==row[1])
-        category = Categories.get(Categories.desc==row[2])
+        # geocode = GeoCodes.get(GeoCodes.desc==row[1])
+        # category = Categories.get(Categories.desc==row[2])
         vector = row[3]
         price = row[-1]
 
         try:
             PriceIndex.get_or_create(date=date,
-                              geocode=geocode,
-                              category=category,
+                              geocode=geocodes[row[1]],
+                              category=cats[row[2]],
                               vector=vector,
                               price=float(price))
         except Exception as e:
-            print(e)
+            print("Error: {}".format(e))
 
 def show_tables():
     """Shows a list containing all the tables in the database."""
@@ -81,19 +90,19 @@ def show_tables():
 def display_geocodes():
     """Displays all the rows from the GeoCodes table."""
     for geocode in GeoCodes.select():
-        print("{:2}| {}".format(geocode.code, geocode.desc))
+        print("{:2}| {}".format(geocode.id, geocode.desc))
 
 def display_categories():
     """Displays all the rows from the Categories table."""
     for cat in Categories.select():
-        print("{:3}| {}".format(cat.code, cat.desc))
+        print("{:3}| {}".format(cat.id, cat.desc))
 
 def display_price_indexes():
     """Displays all the rows from the PriceIndex table."""
     for index in PriceIndex.select():
         print("{}|{}|{}|{}|{}".format(index.date,
-                                      index.geocode.code,
-                                      index.categories.code,
+                                      index.geocode.id,
+                                      index.category.id,
                                       index.vector,
                                       index.price))
 
@@ -103,34 +112,31 @@ class BaseModel(Model):
         database = db
 
 class Categories(BaseModel):
-    """ORM for Catagory."""
-    code = CharField(unique=True)
     desc = CharField()
 
 class GeoCodes(BaseModel):
-    """ORM for GeoCode."""
-    code = CharField(unique=True)
     desc = CharField()
 
 class PriceIndex(BaseModel):
     """ORM for PriceIndex."""
     date = DateField()
-    geocode = ForeignKeyField(GeoCodes.code, column_name="geocode", backref="indexes")
-    category = ForeignKeyField(Categories.code, column_name="category", backref="indexes")
+    geocode = ForeignKeyField(GeoCodes, to_field='id', related_name='indexes')
+    category = ForeignKeyField(Categories, to_field='id', related_name="indexes")
     vector = CharField()
     price = DoubleField()
 
+
     class Meta:
-        coordinate = CompositeKey(GeoCodes.code, Categories.code)
+        coordinate = CompositeKey(GeoCodes, Categories)
 
 if __name__ == '__main__':
     """Creates the database and populates it from the provided data file."""
-    show_tables()
-    create_tables()
-    populate_geocodes()
-    display_geocodes()
-    populate_categories()
-    display_categories()
-    populate_price_indexes()
+    # show_tables()
+    # create_tables()
+    # populate_geocodes()
+    # display_geocodes()
+    # populate_categories()
+    # display_categories()
+    # populate_price_indexes()
     display_price_indexes()
     show_tables()
