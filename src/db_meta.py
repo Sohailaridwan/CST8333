@@ -24,7 +24,7 @@ def show_primary_key_for_categories_table():
 
 
 def show_table_desc_for_categories_table():
-    """Shows a list containing all the tables in the database."""
+    """Shows schema definition for table 'categories'."""
     print("\nAuthor: Sohaila Ridwan")
     print("The schema definition for table 'categories':")
     print(db.get_columns('categories'))
