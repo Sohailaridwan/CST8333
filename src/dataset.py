@@ -9,7 +9,7 @@ from peewee import *
 from datetime import datetime
 
 # SQLite Database access variable
-db = SqliteDatabase("app.db")
+db = SqliteDatabase("C:\Users\Zarir\PycharmProjects\CST8333\src\\app.db")
 
 
 def load_dataset():
@@ -17,7 +17,7 @@ def load_dataset():
 
     :return: list object.
     """
-    with open(os.path.abspath("./data.csv"), "r") as datafile:
+    with open(os.path.abspath("C:\Users\Zarir\PycharmProjects\CST8333\src\\data.csv"), "r") as datafile:
         reader = csv.reader(datafile)
         return list(reader)
 
@@ -79,8 +79,6 @@ def populate_price_indexes():
     print(cats)
     for row in dataset:
         date = datetime.strptime(row[0], "%Y/%m")
-        # geocode = GeoCodes.get(GeoCodes.desc==row[1])
-        # category = Categories.get(Categories.desc==row[2])
         vector = row[3]
         price = row[-1]
 
@@ -94,31 +92,6 @@ def populate_price_indexes():
             print("Error: {}".format(e))
 
 
-
-
-
-def display_geocodes():
-    """Displays all the rows from the GeoCodes table."""
-    for geocode in GeoCodes.select():
-        print("{:2}| {}".format(geocode.id, geocode.desc))
-
-
-def display_categories():
-    """Displays all the rows from the Categories table."""
-    for cat in Categories.select():
-        print("{:3}| {}".format(cat.id, cat.desc))
-
-
-def display_price_indexes():
-    """Displays all the rows from the PriceIndex table."""
-    for index in PriceIndex.select():
-        print("{}|{}|{}|{}|{}".format(index.date,
-                                      index.geocode.id,
-                                      index.category.id,
-                                      index.vector,
-                                      index.price))
-
-
 class BaseModel(Model):
     """Base ORM."""
 
@@ -129,9 +102,21 @@ class BaseModel(Model):
 class Categories(BaseModel):
     desc = CharField()
 
+    @staticmethod
+    def display():
+        """Displays all the rows from the Categories table."""
+        for cat in Categories.select():
+            print("{:3}| {}".format(cat.id, cat.desc))
+
 
 class GeoCodes(BaseModel):
     desc = CharField()
+
+    @staticmethod
+    def display():
+        """Displays all the rows from the GeoCodes table."""
+        for geocode in GeoCodes.select():
+            print("{:2}| {}".format(geocode.id, geocode.desc))
 
 
 class PriceIndex(BaseModel):
@@ -142,6 +127,25 @@ class PriceIndex(BaseModel):
     vector = CharField()
     price = DoubleField()
 
+    @staticmethod
+    def display(year=None, category=None):
+        """Displays all the rows from the PriceIndex table."""
+
+        cond = ()
+
+        if year:
+            cond = (PriceIndex.date.year == year)
+
+        if category:
+            cond = (cond & (PriceIndex.category == category))
+
+        for index in PriceIndex.select().where(cond):
+            print("{}|{}|{}|{}|{}".format(index.date,
+                                          index.geocode.id,
+                                          index.category.id,
+                                          index.vector,
+                                          index.price))
+
     class Meta:
         coordinate = CompositeKey(GeoCodes, Categories)
 
@@ -151,8 +155,8 @@ if __name__ == '__main__':
     # show_tables()
     # create_tables()
     # populate_geocodes()
-    display_geocodes()
     # populate_categories()
-    # display_categories()
     # populate_price_indexes()
-    # display_price_indexes()
+    # GeoCodes.display()
+    # Categories.display()
+    # PriceIndex.display(year=2007, category=1)
