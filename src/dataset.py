@@ -72,11 +72,9 @@ def populate_price_indexes():
     geocodes = {}
     for gcode in GeoCodes.select():
         geocodes[gcode.desc] = gcode
-    print(geocodes)
     cats = {}
     for cat in Categories.select():
         cats[cat.desc] = cat
-    print(cats)
     for row in dataset:
         date = datetime.strptime(row[0], "%Y/%m")
         vector = row[3]
@@ -84,13 +82,12 @@ def populate_price_indexes():
 
         try:
             PriceIndex.get_or_create(date=date,
-                                     geocode=geocodes[row[1]],
-                                     category=cats[row[2]],
-                                     vector=vector,
-                                     price=float(price))
+                              geocode=geocodes[row[1]],
+                              category=cats[row[2]],
+                              vector=vector,
+                              price=float(price))
         except Exception as e:
-            print("Error: {}".format(e))
-
+            pass
 
 class BaseModel(Model):
     """Base ORM."""
@@ -107,8 +104,10 @@ class Categories(BaseModel):
         """Displays all the rows from the Categories table."""
         print("Author: Sohaila Ridwan")
         for cat in Categories.select():
-            print("{:3}| {}".format(cat.id, cat.desc))
-
+            try:
+                print("{:3}| {}".format(cat.id, cat.desc))
+            except Exception:
+                pass
 
 class GeoCodes(BaseModel):
     desc = CharField()
@@ -117,7 +116,10 @@ class GeoCodes(BaseModel):
     def display():
         """Displays all the rows from the GeoCodes table."""
         for geocode in GeoCodes.select():
-            print("{:2}| {}".format(geocode.id, geocode.desc))
+            try:
+                print("{:2}| {}".format(geocode.id, geocode.desc))
+            except Exception:
+                pass
 
 
 class PriceIndex(BaseModel):
@@ -132,7 +134,7 @@ class PriceIndex(BaseModel):
     def display(year=None, category=None):
         """Displays all the rows from the PriceIndex table."""
 
-        cond = ()
+        cond = True
 
         if year:
             cond = (PriceIndex.date.year == year)
@@ -141,22 +143,28 @@ class PriceIndex(BaseModel):
             cond = (cond & (PriceIndex.category == category))
 
         for index in PriceIndex.select().where(cond):
-            print("{}|{}|{}|{}|{}".format(index.date,
-                                          index.geocode.id,
-                                          index.category.id,
-                                          index.vector,
-                                          index.price))
+            try:
+                print("{}|{}|{}|{}|{}|{}".format(index.id,
+                                                 index.date,
+                                                 index.geocode.id,
+                                                 index.category.id,
+                                                 index.vector,
+                                                 index.price))
+            except Exception:
+                pass
 
     class Meta:
         coordinate = CompositeKey(GeoCodes, Categories)
 
+def create_database():
+    create_tables()
+    populate_geocodes()
+    populate_categories()
+    populate_price_indexes()
 
 if __name__ == '__main__':
     """Creates the database and populates it from the provided data file."""
-    # create_tables()
-    # populate_geocodes()
-    # populate_categories()
-    # populate_price_indexes()
-    # GeoCodes.display()
-    Categories.display()
-    # PriceIndex.display(year=2007, category=1)
+    fields = Categories._meta.fields;
+    for k in fields:
+        print("Column '{}': Type '{}'".format(k, fields[k].field_type))
+    pass
