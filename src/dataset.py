@@ -9,7 +9,7 @@ from peewee import *
 from datetime import datetime
 
 # SQLite Database access variable
-db = SqliteDatabase("C:\Users\Zarir\PycharmProjects\CST8333\src\\app.db")
+db = SqliteDatabase("./app.db")
 
 
 def load_dataset():
@@ -17,7 +17,7 @@ def load_dataset():
 
     :return: list object.
     """
-    with open(os.path.abspath("C:\Users\Zarir\PycharmProjects\CST8333\src\\data.csv"), "r") as datafile:
+    with open(os.path.abspath("./data.csv"), "r") as datafile:
         reader = csv.reader(datafile)
         return list(reader)
 
@@ -105,6 +105,7 @@ class Categories(BaseModel):
     @staticmethod
     def display():
         """Displays all the rows from the Categories table."""
+        print("Author: Sohaila Ridwan")
         for cat in Categories.select():
             print("{:3}| {}".format(cat.id, cat.desc))
 
@@ -152,11 +153,10 @@ class PriceIndex(BaseModel):
 
 if __name__ == '__main__':
     """Creates the database and populates it from the provided data file."""
-    # show_tables()
     # create_tables()
     # populate_geocodes()
     # populate_categories()
     # populate_price_indexes()
     # GeoCodes.display()
-    # Categories.display()
+    Categories.display()
     # PriceIndex.display(year=2007, category=1)
