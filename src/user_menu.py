@@ -33,7 +33,8 @@ def print_level2_crud_menu():
         print("4. Delete Record")
         print("5. Back")
 
-        local_choice = input("Enter your choice [1-5]: ")
+        local_choice = int(input("Enter your choice [1-5]: "))
+        print(local_choice, type(local_choice))
         if local_choice == 1:
             ch = print_level3_table_menu()
             if int(ch) <= table_count:
@@ -69,7 +70,7 @@ def print_level2_schema_menu():
         print("3. View Table Primary Key")
         print("4. Back")
 
-        local_choice = input("Enter your choice [1-4]: ")
+        local_choice = int(input("Enter your choice [1-4]: "))
         if local_choice == 1:
             show_tables()
         elif local_choice == 2:
@@ -98,7 +99,7 @@ def print_level3_table_menu():
     print("3. Priceindex")
     print("4. Back")
 
-    local_choice = input("Enter your choice [1-4]: ")
+    local_choice = int(input("Enter your choice [1-4]: "))
 
     if local_choice in menu:
         return local_choice
@@ -110,7 +111,7 @@ if __name__ == '__main__':
     loop = True
     while loop:
         print_level1_menu()
-        choice = input("Enter your choice [1-4]: ")
+        choice = int(input("Enter your choice [1-4]: "))
 
         if choice == 1:
             create_database()
