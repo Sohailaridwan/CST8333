@@ -1,7 +1,7 @@
-"""db_meta.py: Fetches list of tables, and meta information for table 'CATEGORIES' from database."""
+"""db_meta.py: Fetches Database meta information."""
 
 __author__      = "Sohaila Ridwan"
-__date__   = "March 25, 2018"
+__date__   = "April 15, 2018"
 
 from peewee import *
 
@@ -15,20 +15,6 @@ def show_tables():
     print("Database contains following tables:")
     for table in db.get_tables():
         print("# {}".format(table))
-
-
-def show_primary_key_for_categories_table():
-    """Shows the primary key for table 'categories'"""
-    print("\nAuthor: Sohaila Ridwan")
-    print("The primary key column for table 'categories':")
-    print(db.get_primary_keys('categories'))
-
-
-def show_table_desc_for_categories_table():
-    """Shows schema definition for table 'categories'."""
-    """print("\nAuthor: Sohaila Ridwan")"""
-    print("The schema definition for table 'categories':")
-    print(db.get_columns('categories'))
 
 
 def show_primary_key(table):

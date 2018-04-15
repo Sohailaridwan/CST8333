@@ -1,7 +1,9 @@
-"""dataset.py: Parses provided data, generates database tables with SQLite's ORM, displays data from database."""
+"""dataset.py: Parses provided data,
+generates database tables with SQLite's ORM,
+displays data from database."""
 
 __author__      = "Sohaila Ridwan"
-__date__   = "March 25, 2018"
+__date__   = "April 15, 2018"
 
 import csv
 import os
@@ -87,6 +89,7 @@ def populate_price_indexes():
                               vector=vector,
                               price=float(price))
         except Exception as e:
+            print("Error in populating PriceIndex")
             pass
 
 class BaseModel(Model):
@@ -97,29 +100,77 @@ class BaseModel(Model):
 
 
 class Categories(BaseModel):
+    """ORM for Categories."""
     desc = CharField()
 
     @staticmethod
     def display():
         """Displays all the rows from the Categories table."""
-        print("Author: Sohaila Ridwan")
+        print("\nID | Category (unsorted)")
+        print("----------------------------------------------")
         for cat in Categories.select():
             try:
                 print("{:3}| {}".format(cat.id, cat.desc))
             except Exception:
                 pass
 
+    @staticmethod
+    def display_sorted():
+        """Displays all the rows from the Categories table."""
+
+        tmp = []
+        for cat in Categories.select():
+            tmp.append(cat)
+
+        tmp.sort(key=lambda x: x.desc)
+
+        print("\nID | Category (sorted)")
+        print("----------------------------------------------")
+        for cat in tmp:
+            try:
+                print("{:3}| {}".format(cat.id, cat.desc))
+            except Exception:
+                pass
+
+
+
 class GeoCodes(BaseModel):
+    """ORM for GeoCodes."""
     desc = CharField()
+
+    @staticmethod
+    def getkey(GeoCodes):
+        return GeoCodes.desc
 
     @staticmethod
     def display():
         """Displays all the rows from the GeoCodes table."""
+        print("\nID| GeoCode (unsorted)")
+        print("-------------------------------")
+
         for geocode in GeoCodes.select():
             try:
                 print("{:2}| {}".format(geocode.id, geocode.desc))
             except Exception:
                 pass
+
+    @staticmethod
+    def display_sorted():
+        """Displays all the rows from the GeoCodes table."""
+        print("\nID| GeoCode (sorted)")
+        print("-------------------------------")
+
+        tmp = []
+        for geocode in GeoCodes.select():
+            tmp.append(geocode)
+
+        tmp.sort(key=lambda x: x.desc)
+        for geocode in tmp:
+            try:
+                print("{:2}| {}".format(geocode.id, geocode.desc))
+            except Exception:
+                pass
+
 
 
 class PriceIndex(BaseModel):
@@ -153,14 +204,54 @@ class PriceIndex(BaseModel):
             except Exception:
                 pass
 
+    @staticmethod
+    def display_sorted(year=None, category=None):
+        """Displays all the rows from the PriceIndex table."""
+
+        cond = True
+
+        if year:
+            cond = (PriceIndex.date.year == year)
+
+        if category:
+            cond = (cond & (PriceIndex.category == category))
+
+
+        tmp = []
+        for index in PriceIndex.select().where(cond):
+            tmp.append(index)
+
+        tmp.sort(key=lambda x: x.date)
+
+        for index in tmp:
+            try:
+                print("{}|{}|{}|{}|{}|{}".format(index.id,
+                                                 index.date,
+                                                 index.geocode.id,
+                                                 index.category.id,
+                                                 index.vector,
+                                                 index.price))
+            except Exception:
+                pass
+
+
+
     class Meta:
         coordinate = CompositeKey(GeoCodes, Categories)
 
 def create_database():
+    print("Creating database schema...")
     create_tables()
+    print("Done")
+    print("Populating geocodes table...")
     populate_geocodes()
+    print("Done")
+    print("Populating categories table...")
     populate_categories()
+    print("Done")
+    print("Populating priceindex table...")
     populate_price_indexes()
+    print("Done")
 
 if __name__ == '__main__':
     """Creates the database and populates it from the provided data file."""

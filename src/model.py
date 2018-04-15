@@ -1,7 +1,7 @@
 """model.py: Calculates the average price for a category."""
 
 __author__      = "Sohaila Ridwan"
-__date__   = "March 25, 2018"
+__date__   = "April 15, 2018"
 
 from peewee import fn
 from datetime import datetime
